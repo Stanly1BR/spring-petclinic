@@ -31,7 +31,7 @@ jobs:
         projectBaseDir: .
         args: >
           -Dsonar.projectKey=my-Java-web-app
-          -Dsonar.organization=my-org # Apenas se você realmente precisar desta propriedade (para SonarCloud, por exemplo)
+          -Dsonar.organization=my-org
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
