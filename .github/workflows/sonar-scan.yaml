@@ -1,29 +1,37 @@
 name: CI/CD workflow for Maven Build and Sonar Code scan
+
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main # O branch principal do seu repositório (pode ser 'master' em alguns casos)
+  workflow_dispatch: # Permite disparar o workflow manualmente pela interface do GitHub
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # O sistema operacional onde o job será executado
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
+    - name: Checkout code # Passo para clonar o código do repositório
+      uses: actions/checkout@v4 # Usando a versão mais recente da action de checkout
       with:
-        distribution: 'adopt'
-        java-version: '11'
-    - name: Build with Maven
-      run: mvn clean install -f MyWebApp/pom.xml
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
+        fetch-depth: 0 # Necessário para o SonarQube analisar o histórico completo do código
+
+    - name: Set up JDK 17 # Passo para configurar o ambiente Java
+      uses: actions/setup-java@v4 # Usando a versão mais recente da action de setup-java
       with:
-        projectBaseDir: .
-        args: >
-          -Dsonar.organization=my-org
-          -Dsonar.projectKey=my-Java-web-app
+        distribution: 'temurin' # Uma distribuição OpenJDK comum e recomendada
+        java-version: '17' # Versão do Java compatível com Spring PetClinic
+
+    - name: Build with Maven # Passo para compilar o projeto Maven
+      run: mvn clean install # Comando correto para o Spring PetClinic (pom.xml está na raiz)
+
+    - name: SonarQube Scan # Passo para executar a análise do SonarQube
+      uses: sonarsource/sonarqube-scan-action@v2.0.0 # Usando uma versão específica para estabilidade
+      with:
+        projectBaseDir: . # Indica que o projeto base para a análise é o diretório raiz do repositório
+        args: > # Argumentos adicionais para o SonarScanner
+          -Dsonar.projectKey=my-Java-web-app # Substitua pelo Project Key que você configurou no SonarQube
+          # -Dsonar.organization=my-org # Descomente e ajuste se estiver usando SonarCloud ou uma organização específica
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Token de autenticação do SonarQube (armazenado como secret)
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} # URL do seu servidor SonarQube (armazenado como secret)
